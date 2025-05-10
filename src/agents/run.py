@@ -568,6 +568,13 @@ class Runner:
                     streamed_result._event_queue.put_nowait(QueueCompleteSentinel())
                     break
 
+
+                streamed_result.input = await cls._run_step_input_filter(
+                    original_input=streamed_result.input,
+                    run_config=run_config,
+                    span=current_span
+                )
+
                 if current_turn == 1:
                     # Run the input guardrails in the background and put the results on the queue
                     streamed_result._input_guardrails_task = asyncio.create_task(
