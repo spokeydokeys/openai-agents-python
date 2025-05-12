@@ -485,48 +485,69 @@ async def test_tool_and_handoff_parsed_correctly():
 @pytest.fixture
 def response_input_items():
     return [
-        { # Message
-            "role": "system", "status": "completed", "type": "message", "content": "Message 1"
+        {  # Message
+            "role": "system",
+            "status": "completed",
+            "type": "message",
+            "content": "Message 1",
         },
-        { # Message
-            "role": "user", "status": "completed", "type": "message", "content": "Message 2"
+        {  # Message
+            "role": "user",
+            "status": "completed",
+            "type": "message",
+            "content": "Message 2",
         },
-        { # ComputerCallOutput
+        {  # ComputerCallOutput
             "call_id": "call_1",
-            "output": { # ResponseComputerToolCallOutputScreenshotParam
-                "id": "screenshot_1", "type": "screenshot", "url": "http://example.com/screenshot.png"
+            "output": {  # ResponseComputerToolCallOutputScreenshotParam
+                "id": "screenshot_1",
+                "type": "screenshot",
+                "url": "http://example.com/screenshot.png",
             },
             "type": "computer_call_output",
             "id": "output_1",
             "acknowledged_safety_checks": [
-                { # ComputerCallOutputAcknowledgedSafetyCheck
-                    "id": "check_1", "code": "code_1", "message": "message_1"
+                {  # ComputerCallOutputAcknowledgedSafetyCheck
+                    "id": "check_1",
+                    "code": "code_1",
+                    "message": "message_1",
                 }
             ],
         },
-        { # FunctionCallOutput
+        {  # FunctionCallOutput
             "call_id": "call_2",
-            "output": { # ResponseFunctionWebSearch
-                "id": "web_search_1", "type": "web_search_call", "status": "completed"
+            "output": {  # ResponseFunctionWebSearch
+                "id": "web_search_1",
+                "type": "web_search_call",
+                "status": "completed",
             },
             "type": "function_call_output",
             "id": "output_2",
         },
-        { # Message
-            "role": "user", "status": "completed", "type": "message", "content": "Message 3"
+        {  # Message
+            "role": "user",
+            "status": "completed",
+            "type": "message",
+            "content": "Message 3",
         },
-        { # Message
-            "role": "system", "status": "completed", "type": "message", "content": "Message 4"
-        }
+        {  # Message
+            "role": "system",
+            "status": "completed",
+            "type": "message",
+            "content": "Message 4",
+        },
     ]
+
 
 @pytest.fixture
 def run_config():
     return RunConfig()
 
+
 @pytest.fixture
 def span():
     return agent_span(name="test_span")
+
 
 @pytest.mark.asyncio
 async def test_run_input_step_filter_not_callable(response_input_items, run_config, span):
@@ -567,6 +588,7 @@ async def test_run_input_step_filter_output(response_input_items, run_config, sp
     # invalid output type
     def input_filter(*args, **kwargs):
         return 5
+
     run_config.run_step_input_filter = input_filter
 
     # returns input by default
@@ -589,6 +611,7 @@ async def test_run_input_step_filter_output(response_input_items, run_config, sp
     # string output is okay
     def input_filter_str_output(*args, **kwargs):
         return "This is a string output"
+
     run_config.run_step_input_filter = input_filter_str_output
     result = await Runner._run_step_input_filter(
         original_input=response_input_items,
@@ -600,17 +623,10 @@ async def test_run_input_step_filter_output(response_input_items, run_config, sp
     # list of dicts with "type"
     def input_filter_dict_output(*args, **kwargs):
         return [
-            {
-                "type": "message",
-                "role": "user",
-                "content": "This is a user message"
-            },
-            {
-                "type": "message",
-                "role": "system",
-                "content": "This is a system message"
-            }
+            {"type": "message", "role": "user", "content": "This is a user message"},
+            {"type": "message", "role": "system", "content": "This is a system message"},
         ]
+
     run_config.run_step_input_filter = input_filter_dict_output
     result = await Runner._run_step_input_filter(
         original_input=response_input_items,
@@ -620,10 +636,12 @@ async def test_run_input_step_filter_output(response_input_items, run_config, sp
     assert len(result) == 2
     assert result == input_filter_dict_output()
 
+
 @pytest.mark.asyncio
 async def test_run_input_step_filter_error(response_input_items, run_config, span):
     def input_filter(*args, **kwargs):
         raise Exception("This is an error")
+
     run_config.run_step_input_filter = input_filter
 
     # returns input by default
@@ -649,6 +667,7 @@ async def test_run_input_step_filter(response_input_items, run_config, span):
     # test sync function
     def input_filter(input_items):
         return [item for item in input_items if item.get("role", "") == "user"]
+
     run_config.run_step_input_filter = input_filter
 
     result = await Runner._run_step_input_filter(
@@ -662,8 +681,9 @@ async def test_run_input_step_filter(response_input_items, run_config, span):
     # test async function
     async def input_filter_async(input_items):
         return await asyncio.to_thread(
-            lambda : [item for item in input_items if item.get("role", "") == "user"]
+            lambda: [item for item in input_items if item.get("role", "") == "user"]
         )
+
     run_config.run_step_input_filter = input_filter_async
     result = await Runner._run_step_input_filter(
         original_input=response_input_items,

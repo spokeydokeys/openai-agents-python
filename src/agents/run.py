@@ -72,10 +72,9 @@ class RunConfig:
     agent. See the documentation in `Handoff.input_filter` for more details.
     """
 
-    run_step_input_filter: callable[
-        str | list[TResponseInputItem],
-        str | list[TResponseInputItem]
-    ] | None = None
+    run_step_input_filter: (
+        callable[str | list[TResponseInputItem], str | list[TResponseInputItem]] | None
+    ) = None
     """A global input filter to apply between agent steps. If set, the input to the agent will be
     passed through this function before being sent to the model. This is useful for modifying the
     input to the model, for example, to manage the context window size."""
@@ -568,11 +567,8 @@ class Runner:
                     streamed_result._event_queue.put_nowait(QueueCompleteSentinel())
                     break
 
-
                 streamed_result.input = await cls._run_step_input_filter(
-                    original_input=streamed_result.input,
-                    run_config=run_config,
-                    span=current_span
+                    original_input=streamed_result.input, run_config=run_config, span=current_span
                 )
 
                 if current_turn == 1:
@@ -1006,16 +1002,12 @@ class Runner:
         filter = run_config.run_step_input_filter
         _raise = run_config.run_step_input_filter_raise_error
 
-        def is_acceptable_response(
-            response: object
-        ) -> bool:
-            return (
-                isinstance(response, str)
-                or (
-                    isinstance(response, Iterable)
-                    and all(
-                        "type" in item for item in response  # minimal check for ResponseInputItem
-                    )
+        def is_acceptable_response(response: object) -> bool:
+            return isinstance(response, str) or (
+                isinstance(response, Iterable)
+                and all(
+                    "type" in item
+                    for item in response  # minimal check for ResponseInputItem
                 )
             )
 
@@ -1031,9 +1023,7 @@ class Runner:
                 ),
             )
             if _raise:
-                raise ModelBehaviorError(
-                    "Input step filter is not callable"
-                )
+                raise ModelBehaviorError("Input step filter is not callable")
             return original_input
         try:
             if iscoroutinefunction(filter):
@@ -1052,9 +1042,7 @@ class Runner:
                 ),
             )
             if _raise:
-                raise ModelBehaviorError(
-                    "Input step filter raised an exception"
-                ) from e
+                raise ModelBehaviorError("Input step filter raised an exception") from e
             return original_input
 
         if not is_acceptable_response(input_filter_response):
@@ -1062,16 +1050,13 @@ class Runner:
                 span,
                 SpanError(
                     message=(
-                        "Input step filter did not return a string "
-                        "or list of ResponseInputItems")
-                    ,
+                        "Input step filter did not return a string or list of ResponseInputItems"
+                    ),
                     data={"input_step_filter": filter, "response": input_filter_response},
                 ),
             )
             if _raise:
-                raise ModelBehaviorError(
-                    "Input step filter did not return a string or list"
-                )
+                raise ModelBehaviorError("Input step filter did not return a string or list")
             return original_input
 
         return input_filter_response
