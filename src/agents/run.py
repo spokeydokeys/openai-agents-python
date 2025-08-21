@@ -863,11 +863,15 @@ class AgentRunner:
                         streamed_result.is_complete = True
 
                         # Save the conversation to session if enabled
-                        await AgentRunner._save_result_to_session(session, [], turn_result.new_step_items)
+                        await AgentRunner._save_result_to_session(
+                            session, [], turn_result.new_step_items
+                        )
 
                         streamed_result._event_queue.put_nowait(QueueCompleteSentinel())
                     elif isinstance(turn_result.next_step, NextStepRunAgain):
-                        await AgentRunner._save_result_to_session(session, [], turn_result.new_step_items)
+                        await AgentRunner._save_result_to_session(
+                            session, [], turn_result.new_step_items
+                        )
                 except AgentsException as exc:
                     streamed_result.is_complete = True
                     streamed_result._event_queue.put_nowait(QueueCompleteSentinel())
