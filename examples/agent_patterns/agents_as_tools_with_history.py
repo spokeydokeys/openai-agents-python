@@ -1,5 +1,6 @@
 import asyncio
 import tempfile
+from typing import cast
 
 from agents import Agent, Runner, SQLiteSession, trace
 from agents.tool import function_tool
@@ -31,7 +32,6 @@ italian_agent = Agent(
 
 
 async def main(session_id, file_path):
-
     @function_tool
     async def check_tool() -> str:
         """A tool that looks at the entire conversation, checks
@@ -61,8 +61,7 @@ async def main(session_id, file_path):
             check_agent,
             input=input_messages,
         )
-        return output.final_output
-
+        return cast(str, output.final_output)
 
     orchestrator_agent = Agent(
         name="orchestrator_agent",
@@ -85,8 +84,8 @@ async def main(session_id, file_path):
                 tool_name="translate_to_italian",
                 tool_description="Translate the user's message to Italian",
             ),
-            check_tool
-        ]
+            check_tool,
+        ],
     )
 
     msg = input("Hi! What would you like translated? ")
