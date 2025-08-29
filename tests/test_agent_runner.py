@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import tempfile
+from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from typing_extensions import TypedDict
@@ -20,6 +23,7 @@ from agents import (
     RunConfig,
     RunContextWrapper,
     Runner,
+    SQLiteSession,
     UserError,
     handoff,
 )
@@ -35,11 +39,6 @@ from .test_responses import (
     get_text_input_item,
     get_text_message,
 )
-
-import tempfile
-from pathlib import Path
-from agents import SQLiteSession
-from unittest.mock import patch
 
 
 @pytest.mark.asyncio
